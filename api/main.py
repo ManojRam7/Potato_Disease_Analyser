@@ -1,54 +1,70 @@
-from fastapi import FastAPI, File, UploadFile
-import numpy as np
 import uvicorn
-from PIL import Image
-from io import BytesIO
-import tensorflow as tf
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()
+from potato_disease_classifier.config import CLASS_NAMES, DEFAULT_MODEL_PATH
+from potato_disease_classifier.inference import ModelNotAvailableError, predict_from_bytes
 
-MODEL = tf.keras.models.load_model("/Users/manojrammopati/Project/DATA SCIENCE ML PROJECTS/Potato Disease Classifier/Model/1.keras")
+app = FastAPI(
+    title="Potato Disease Classifier API",
+    version="2.0.0",
+    description="FastAPI inference service for potato leaf disease classification.",
+)
 
-CLASS_NAMES = ["EARLY BLIGHT","LATE BLIGHT","HEALTHY"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.get("/ping")
-async def ping():
-    return "server is live"
+
+@app.get("/")
+async def root() -> dict[str, str]:
+    return {
+        "service": "Potato Disease Classifier API",
+        "docs": "/docs",
+        "health": "/health",
+    }
 
 
-def read_file_as_image(data) -> np.ndarray:
-    image = Image.open(BytesIO(data))
-    image = image.resize((256, 256))  # Resize the image to the expected input shape
-    return np.array(image)
-   # return np.array(Image.open(BytesIO(data)))
+@app.get("/health")
+async def health() -> dict[str, object]:
+    return {
+        "status": "ok",
+        "model_path": str(DEFAULT_MODEL_PATH),
+        "classes": list(CLASS_NAMES),
+    }
 
 
 @app.post("/predict")
-async def predict(
-    file: UploadFile = File(...)
-):
-    image = read_file_as_image(await file.read())
-    img_batch = np.expand_dims(image, 0)
-   # MODEL.predict(image)
-    prediction = MODEL.predict(img_batch)
-    predicted_class = CLASS_NAMES[np.argmax(prediction[0])]
-    confidence = np.max(prediction[0])
-    return {"prediction": predicted_class , "confidence": float(confidence)}
+async def predict(file: UploadFile = File(...)) -> dict[str, object]:
+    if file.content_type and not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Uploaded file must be an image.")
 
+    image_bytes = await file.read()
+    if not image_bytes:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
 
-#app.mount("/static", StaticFiles(directory="static"), name="static")
+    try:
+        result = predict_from_bytes(image_bytes)
+    except ModelNotAvailableError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {exc}") from exc
 
-@app.get("/", response_class=HTMLResponse)
-async def read_index():
-    with open("/Users/manojrammopati/Project/DATA SCIENCE ML PROJECTS/Potato Disease Classifier/api/index.html") as f:
-        return f.read()
+    return {
+        "prediction": result["predicted_class"],
+        "confidence": result["confidence"],
+        "probabilities": result["probabilities"],
+        "filename": file.filename,
+    }
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host='localhost', port=8000)
-    
+    uvicorn.run("api.main:app", host="127.0.0.1", port=8000, reload=False)
 
 
-    
+
+

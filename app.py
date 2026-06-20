@@ -1,79 +1,38 @@
-# filepath: /Users/manojrammopati/Project/DATA SCIENCE ML PROJECTS/Potato Disease Classifier/app.py
-import streamlit as st
-import requests
-from PIL import Image
-import io
-import numpy as np
-from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-import tensorflow as tf
-from io import BytesIO
-import uvicorn
-import threading
+import argparse
+import json
+from pathlib import Path
 
-# Initialize FastAPI app
-app = FastAPI()
+from potato_disease_classifier.inference import ModelNotAvailableError, predict_from_bytes
 
-# Allow CORS for all origins
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
-# Load the model
-MODEL = tf.keras.models.load_model("/Users/manojrammopati/Project/DATA SCIENCE ML PROJECTS/Potato Disease Classifier/Model/1.keras")
-CLASS_NAMES = ["EARLY BLIGHT", "LATE BLIGHT", "HEALTHY"]
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Run potato leaf disease prediction for a local image file.",
+    )
+    parser.add_argument("--image", required=True, help="Path to a potato leaf image.")
+    parser.add_argument(
+        "--model-path",
+        required=False,
+        default=None,
+        help="Optional path to a .keras/.h5 model file.",
+    )
+    args = parser.parse_args()
 
-@app.get("/ping")
-async def ping():
-    return "server is live"
+    image_path = Path(args.image).expanduser().resolve()
+    if not image_path.exists():
+        raise FileNotFoundError(f"Image not found: {image_path}")
 
-def read_file_as_image(data) -> np.ndarray:
-    image = Image.open(BytesIO(data))
-    image = image.resize((256, 256))  # Resize the image to the expected input shape
-    return np.array(image)
+    with image_path.open("rb") as f:
+        image_bytes = f.read()
 
-@app.post("/predict")
-async def predict(file: UploadFile = File(...)):
-    image = read_file_as_image(await file.read())
-    img_batch = np.expand_dims(image, 0)
-    prediction = MODEL.predict(img_batch)
-    predicted_class = CLASS_NAMES[np.argmax(prediction[0])]
-    confidence = np.max(prediction[0])
-    return JSONResponse({"prediction": predicted_class, "confidence": float(confidence)})
+    try:
+        result = predict_from_bytes(image_bytes, model_path=args.model_path)
+    except ModelNotAvailableError as exc:
+        raise RuntimeError(str(exc)) from exc
 
-# Run FastAPI in a separate thread
-def run_fastapi():
-    uvicorn.run(app, host='localhost', port=8000)
+    print(json.dumps(result, indent=2))
+    return 0
 
-threading.Thread(target=run_fastapi, daemon=True).start()
 
-# Streamlit frontend
-st.title("Potato Disease Classifier")
-
-uploaded_file = st.file_uploader("Choose an image...", type="jpg")
-
-if uploaded_file is not None:
-    image = Image.open(uploaded_file)
-    st.image(image, caption='Uploaded Image.', use_column_width=True)
-    st.write("")
-    st.write("Classifying...")
-
-    # Convert the image to bytes
-    img_bytes = io.BytesIO()
-    image.save(img_bytes, format='JPEG')
-    img_bytes = img_bytes.getvalue()
-
-    # Send the image to the FastAPI backend
-    response = requests.post("http://localhost:8000/predict", files={"file": img_bytes})
-
-    if response.status_code == 200:
-        result = response.json()
-        st.write(f"Prediction: {result['prediction']}")
-        st.write(f"Confidence: {result['confidence']}")
-    else:
-        st.write("Error: Unable to get prediction.")
+if __name__ == "__main__":
+    raise SystemExit(main())

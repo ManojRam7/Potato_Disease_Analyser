@@ -1,25 +1,126 @@
-## Potato Disease Classification Project
+# 🥔 Potato Disease Classifier | Production-Ready Data Science Portfolio Project
 
-This project focuses on developing a machine learning model to classify various diseases affecting potato plants. By leveraging image processing and advanced classification algorithms, the model aims to accurately identify diseases from images of potato leaves. This can help farmers and agricultural professionals take timely actions to manage and treat potato diseases, ultimately improving crop yield and quality.
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-2.16%2B-FF6F00?logo=tensorflow)
+![FastAPI](https://img.shields.io/badge/FastAPI-API-009688?logo=fastapi)
+![Streamlit](https://img.shields.io/badge/Streamlit-UI-FF4B4B?logo=streamlit)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/Status-Portfolio%20Ready-success)
 
-### Key Features
-- **Image Processing**: Techniques to preprocess and enhance images of potato leaves.
-- **Machine Learning**: Implementation of classification algorithms to identify diseases.
-- **Dataset**: Utilization of a labeled dataset containing images of healthy and diseased potato leaves.
-- **Evaluation**: Metrics to assess the accuracy and performance of the model.
+End-to-end potato leaf disease classification system with:
+- Shared inference core
+- FastAPI production-style backend
+- Streamlit interactive frontend
+- CLI prediction utility
+- Clean project structure, tests, and professional documentation
 
-### Goals
-- Develop a reliable and efficient disease classification model.
-- Provide a user-friendly interface for farmers to upload images and get instant disease diagnosis.
-- Contribute to the agricultural community by reducing crop losses due to diseases.
+## 🚀 Problem Statement
+Potato crops are highly vulnerable to leaf diseases such as Early Blight and Late Blight. This project demonstrates an ML-powered diagnosis workflow that predicts disease class from a leaf image to support rapid field decisions.
 
-### Tools and Technologies
-- Python
-- TensorFlow/Keras
-- OpenCV
-- Scikit-learn
+## 🎯 Predicted Classes
+- Early Blight
+- Late Blight
+- Healthy
 
-### Future Work
-- Expand the dataset with more diverse images.
-- Improve model accuracy with advanced deep learning techniques.
-- Develop a mobile application for easy access and use by farmers.
+## 🧱 Project Structure
+```text
+PotatoDisease_Classifier/
+├── api/
+│   ├── main.py
+│   └── README.md
+├── Model/
+│   ├── 1.keras
+│   ├── 2.keras
+│   ├── 3.keras
+│   ├── 4.keras
+│   ├── 5.keras
+│   └── plant_disease_model.h5
+├── potato_disease_classifier/
+│   ├── __init__.py
+│   ├── config.py
+│   └── inference.py
+├── tests/
+│   └── test_inference.py
+├── Training/
+│   ├── Model_Training.IPYNB
+│   ├── PlantVillage/
+│   └── README.md
+├── app.py
+├── str_app.py
+├── requirements.txt
+├── requirements-dev.txt
+└── README.md
+```
+
+## ⚙️ Setup
+### 1. Create and activate virtual environment
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 2. Install dependencies
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+```
+
+## ▶️ Run The Project
+### Option A: FastAPI backend
+```bash
+uvicorn api.main:app --host 127.0.0.1 --port 8000
+```
+Open docs at: http://127.0.0.1:8000/docs
+
+### Option B: Streamlit frontend
+```bash
+streamlit run str_app.py
+```
+
+### Option C: CLI prediction
+```bash
+python app.py --image path/to/leaf.jpg
+```
+
+## 🧪 Run Tests
+```bash
+pytest -q
+```
+
+## 📡 API Contract
+### GET /health
+Returns service status, model path, and class labels.
+
+### POST /predict
+Upload an image file as multipart/form-data under key file.
+
+Example response:
+```json
+{
+  "prediction": "Late Blight",
+  "confidence": 0.9412,
+  "probabilities": {
+    "Early Blight": 0.031,
+    "Late Blight": 0.9412,
+    "Healthy": 0.0278
+  },
+  "filename": "leaf.png"
+}
+```
+
+## 🏆 Portfolio Highlights
+- Production-style separation of concerns (core inference vs API/UI)
+- No hardcoded absolute system paths
+- Reusable inference utilities with robust error handling
+- Minimal test suite to validate preprocessing and prediction contract
+- Clean documentation and reproducible setup
+
+## 🔮 Next Improvements
+- Add model versioning and experiment tracking (MLflow)
+- Add CI workflow (lint/test/build)
+- Add Docker deployment for backend and UI
+- Add model monitoring (drift and confidence tracking)
+
+## 👤 Author
+Manoj Ram Mopati
