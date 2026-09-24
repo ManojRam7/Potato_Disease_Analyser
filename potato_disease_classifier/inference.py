@@ -34,8 +34,9 @@ def load_model(model_path: Optional[Union[str, Path]] = None) -> Any:
 def read_image_from_bytes(data: bytes) -> np.ndarray:
     image = Image.open(BytesIO(data)).convert("RGB")
     image = image.resize(IMAGE_SIZE)
-    arr = np.asarray(image, dtype=np.float32) / 255.0
-    return arr
+    # Keep pixels in the 0-255 range: the trained model starts with its own
+    # Resizing and Rescaling(1/255) layers, so scaling here would apply it twice.
+    return np.asarray(image, dtype=np.float32)
 
 
 def predict_from_bytes(

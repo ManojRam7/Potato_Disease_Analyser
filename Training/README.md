@@ -1,10 +1,8 @@
-# Training Assets
+# Training
 
-This folder stores notebook-based model experimentation and the PlantVillage image dataset split used for training.
+- `Model_Training.IPYNB`: data loading, 80/10/10 split, augmentation, CNN definition, 50-epoch
+  training, evaluation on the test set, sample predictions and model saving.
+- `PlantVillage/`: the training images, one folder per class (`Potato___Early_blight`,
+  `Potato___Late_blight`, `Potato___healthy`).
 
-## Included
-- `Model_Training.IPYNB` - model training and experimentation notebook
-- `PlantVillage/` - image dataset folders
-
-## Note
-Training artifacts are preserved as reference. Production inference uses model files in `Model/`.
+The saved models used by the apps are in `../Model/`.

@@ -20,7 +20,8 @@ def test_read_image_from_bytes_shape_and_type() -> None:
     assert arr.shape == (256, 256, 3)
     assert arr.dtype == np.float32
     assert float(arr.min()) >= 0.0
-    assert float(arr.max()) <= 1.0
+    assert float(arr.max()) <= 255.0
+    assert float(arr.max()) > 1.0   # not pre-scaled: the model rescales internally
 
 
 def test_predict_from_bytes_with_dummy_model(monkeypatch) -> None:

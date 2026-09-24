@@ -8,12 +8,11 @@ from potato_disease_classifier.inference import ModelNotAvailableError, predict_
 
 st.set_page_config(
     page_title="Potato Disease Classifier",
-    page_icon="🥔",
     layout="wide",
 )
 
-st.title("🥔 Potato Disease Classifier")
-st.caption("Upload a potato leaf image to detect disease class and confidence.")
+st.title("Potato Leaf Disease Classifier")
+st.caption("Upload a photo of a potato leaf to check for early blight or late blight.")
 
 with st.sidebar:
     st.subheader("Model")
@@ -53,4 +52,4 @@ else:
     st.bar_chart(probabilities)
 
 st.divider()
-st.caption("Portfolio-ready demo app by Manoj Ram Mopati")
+st.caption("CNN trained on 2,152 PlantVillage potato leaf images · 95% test accuracy · Manoj Ram Mopati")
