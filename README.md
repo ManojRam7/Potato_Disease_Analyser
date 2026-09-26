@@ -1,4 +1,4 @@
-# Potato Leaf Disease Classifier
+# Potato Disease Analyser
 
 A convolutional neural network that classifies potato leaf photos as **early blight**, **late
 blight** or **healthy**, served three ways: a Streamlit web app, a FastAPI endpoint and a

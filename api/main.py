@@ -6,7 +6,7 @@ from potato_disease_classifier.config import CLASS_NAMES, DEFAULT_MODEL_PATH
 from potato_disease_classifier.inference import ModelNotAvailableError, predict_from_bytes
 
 app = FastAPI(
-    title="Potato Disease Classifier API",
+    title="Potato Disease Analyser API",
     version="2.0.0",
     description="FastAPI inference service for potato leaf disease classification.",
 )
@@ -23,7 +23,7 @@ app.add_middleware(
 @app.get("/")
 async def root() -> dict[str, str]:
     return {
-        "service": "Potato Disease Classifier API",
+        "service": "Potato Disease Analyser API",
         "docs": "/docs",
         "health": "/health",
     }

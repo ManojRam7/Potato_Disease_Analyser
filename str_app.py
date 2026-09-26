@@ -7,11 +7,11 @@ from potato_disease_classifier.config import DEFAULT_MODEL_PATH
 from potato_disease_classifier.inference import ModelNotAvailableError, predict_from_bytes
 
 st.set_page_config(
-    page_title="Potato Disease Classifier",
+    page_title="Potato Disease Analyser",
     layout="wide",
 )
 
-st.title("Potato Leaf Disease Classifier")
+st.title("Potato Leaf Disease Analyser")
 st.caption("Upload a photo of a potato leaf to check for early blight or late blight.")
 
 with st.sidebar:
